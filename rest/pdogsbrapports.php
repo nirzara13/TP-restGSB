@@ -69,14 +69,14 @@ class PdoGsbRapports{
                 else              
                     return NULL;
 	}
-        public function getLesRapportsUneDate($login, $mdp, $date){
-                $req = "select rapport.id as id ,medecin.nom as nomMedecin, medecin.prenom as prenomMedecin ";
-                $req .= " from visiteur, rapport, medecin where visiteur.login = :login and visiteur.mdp = :mdp";
+        public function getLesRapportsUneDate($idVisiteur, $date){
+                $req = "select rapport.id as idRapport, medecin.nom as nomMedecin, medecin.prenom as prenomMedecin, ";
+                $req .= "rapport.motif as motif, rapport.bilan as bilan ";
+                $req .= " from visiteur, rapport, medecin where visiteur.id = :idVisiteur";
                 $req.= " and rapport.idVisiteur = visiteur.id ";
                 $req .=" and rapport.idMedecin = medecin.id and rapport.date = :date ";
                 $stm = self::$monPdo->prepare($req);
-                $stm->bindParam(':login', $login);
-                $stm->bindParam(':mdp', $mdp);
+                $stm->bindParam(':idVisiteur', $idVisiteur);
                 $stm->bindParam(':date', $date);
                 $stm->execute();
                 $lesLignes = $stm->fetchall();
@@ -90,7 +90,7 @@ class PdoGsbRapports{
                 $laLigne = $stm->fetch();
                 return $laLigne;
          }
-        public function majRapport($idRapport,$bilan,$motif){
+        public function majRapport($idRapport,$motif,$bilan){
                  $req = "update rapport set bilan = :bilan ,motif = :motif where id = :idRapport";
                   $stm = self::$monPdo->prepare($req);
                   $stm->bindParam(':idRapport', $idRapport);
@@ -148,7 +148,7 @@ class PdoGsbRapports{
                 return $lesLignes;
             
         }
-        public function ajouterRapport($idMedecin ,$idVisiteur ,$bilan ,$motif ,$date ,$lesMedicaments){
+        public function ajouterRapport($idMedecin ,$idVisiteur ,$bilan ,$motif ,$date ,$medicaments){
                   $req = "insert into rapport(idMedecin ,idVisiteur ,bilan ,date, motif) " ;
                   $req .= " values (:idMedecin ,:idVisiteur ,:bilan , :date,  :motif )";
                   $stm = self::$monPdo->prepare($req);
@@ -159,10 +159,10 @@ class PdoGsbRapports{
                   $stm->bindParam(':date', $date); 
                   $retour = $stm->execute();;
                   $idRapport =  self::$monPdo->lastInsertId();   // récupère l'id créé
-                  if($lesMedicaments !=0){
-                          foreach ($lesMedicaments as $medicament){
-                              $idMedicament = $medicament['idMedicament'];
-                              $qte = $medicament['qte'];
+                  if($medicaments !=0){
+                          foreach ($medicaments as $idMedicament =>$qte){
+                            //  $idMedicament = $medicament['idMedicament'];
+                             // $qte = $medicament['qte'];
                               $req = "insert into offrir(idRapport, idMedicament, quantite) ";
                               $req .= "values( :idRapport, :idMedicament, :qte)  ";
                               $stm = self::$monPdo->prepare($req);

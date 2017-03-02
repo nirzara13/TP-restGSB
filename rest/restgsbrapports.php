@@ -114,7 +114,8 @@ class RestGSB extends Rest {
         * Si l'uri n'est pas correcte, on retourne le status 'Bad request'
         */
         switch ($this->request['endpoint']) {
-        // ce service s'appellera à partir d'une URI de la forme .../restGSB/medecin/nom=tre  
+        // ce service s'appellera à partir d'une URI de la forme .../restGSB/medecin/nom=tre
+        // ou tre est le début du nom du médecin  
             case "medecins" :
                 if ( isset($args['id']) ) {  // l'id de la ressource NE DOIT PAS être renseigné
                     $this->response("", 400); // Bad Request
@@ -127,7 +128,8 @@ class RestGSB extends Rest {
                     }
                 }
                 break;
-      // ce service s'appellera à partir d'une URI de la forme .../restGSB/medecin/123       
+      // ce service s'appellera à partir d'une URI de la forme .../restGSB/medecin/123 
+      // où 123 est l'id du médecin      
             case "medecin" :
                 if ( !isset($args['id']) ) {  // l'id de la ressource DOIT être renseigné
                     $this->response("", 400); // Bad Request
@@ -144,6 +146,7 @@ class RestGSB extends Rest {
                 }
                 break;
      // ce service s'appellera à partir d'une URI de la forme .../restGSB/rapport/789
+     // où 789 est l'id du rapport
             case "rapport" :
                 if ( !isset($args['id']) ) {  // l'id de la ressource DOIT être renseigné
                     $this->response("", 400); // Bad Request
@@ -158,9 +161,10 @@ class RestGSB extends Rest {
                     }
                 }
                 break;
-         // ce service s'appellera à partir d'une URI de la forme .../restGSB/rapports?idMedecin=540
+         // ce service s'appellera à partir d'une URI de la forme .../restGSB/rapports/540
+         // où 540 est l'id du médecin'
             case "rapports" :
-                if ( isset($args['id']) ) {  // l'id de la ressource NE DOIT PAS être renseigné
+                if ( !isset($args['id']) ) {  // l'id de la ressource DOIT être renseigné
                     $this->response("", 400); // Bad Request
                 }
                 else {  // Seules la méthode GET est autorisée
@@ -172,9 +176,24 @@ class RestGSB extends Rest {
                     }
                 }
                 break;
+            case "rapports_a_date" :
+                 if ( isset($args['id']) ) {  // l'id de la ressource ne DOIT être renseigné
+                    $this->response("", 400); // Bad Request
+                }
+                else{
+                      if ($this->method == 'GET') {
+                        $this->request['fonction'] = "getLesRapportsUneDate";
+                       } 
+                        else {
+                        $this->response("", 400); // Bad Request
+                    }
+
+                }
+                break;    
             case 'connexion':
              
-            // ce service s'appellera à partir d'une URI de la forme POST.../restGSB/connexion
+            // ce service s'appellera à partir d'une URI de la forme GET.../restGSB/connexion?login=toto&mdp=titi
+            //
                 if ( isset($args['id']) ) {  // l'id de la ressource NE DOIT PAS être renseigné
                     $this->response("", 400); // Bad Request
                 }
@@ -187,6 +206,69 @@ class RestGSB extends Rest {
                         $this->response("", 400); // Bad Request
                     }
                 }
+                break;
+                case 'majmedecin':
+//// ce service s'appellera à partir d'une URI de la forme :
+//     ../restGSB/majmedecin?id=12&adresse=ville&tel=1234567891&specialite=psy
+                if ( isset($args['id']) ) {  // l'id de la ressource NE DOIT PAS être renseigné
+                    $this->response("", 400); // Bad Request
+                }
+                else {  // Seules la méthode GET est autorisée
+                    if ($this->method == 'GET') {
+                        $this->request['fonction'] = "majMedecin";
+     //                      error_log(print_r("Ok dans le bon case",true),3,"log.txt");
+                          
+                    } else {
+                        $this->response("", 400); // Bad Request
+                    }
+                }
+
+                break;
+                case 'majrapport' :
+                 if ( isset($args['id']) ) {  // l'id de la ressource NE DOIT PAS être renseigné
+                    $this->response("", 400); // Bad Request
+                }
+                else {  // Seules la méthode GET est autorisée
+                    if ($this->method == 'GET') {
+                        $this->request['fonction'] = "majRapport";
+     //                      error_log(print_r("Ok dans le bon case",true),3,"log.txt");
+                          
+                    } else {
+                        $this->response("", 400); // Bad Request
+                    }
+                }
+
+                break;
+  // ce service s'appellera à partir d'une URI de la forme :
+//     ../restGSB/medicaments?nom=tr              
+                case  'medicaments':
+                     if ( isset($args['id']) ) {  // l'id de la ressource ne DOIT être renseigné
+                    $this->response("", 400); // Bad Request
+                }
+                else {  // Seules la méthode GET est autorisée
+                    if ($this->method == 'GET') {
+                        $this->request['fonction'] = "getLesMedicaments";
+                    } 
+                    else {
+                        $this->response("", 400); // Bad Request
+                    }
+                }
+                break;
+                case  'nouveaurapport':
+                         if ( isset($args['id']) ) {  // l'id de la ressource ne DOIT être renseigné
+                            $this->response("", 400); // Bad Request
+                        }
+                        else {  // Seules la méthode GET est autorisée
+                             if ($this->method == 'GET') {
+                                 $this->request['fonction'] = "nouveauRapport";
+     //                      error_log(print_r("Ok dans le bon case",true),3,"log.txt");
+                          
+                             } 
+                             else {
+                                $this->response("", 400); // Bad Request
+                            }
+                         }
+
                 break;
               default:
          }
@@ -230,8 +312,6 @@ class RestGSB extends Rest {
     private function getLesMedecins($args){
         $nom = $args['nom'];
         $lesLignes = $this->pdo->getLesMedecins($nom);
-         
-
         $this->data = $this->encoderReponse( $lesLignes);
     }  
     private function getLeMedecin($args){
@@ -250,10 +330,45 @@ class RestGSB extends Rest {
         $this->data = $this->encoderReponse( $laLigne);
     } 
     private function getLesRapports($args){
-        $idMedecin = $args['idMedecin'];
+        $idMedecin = $args['id'];
         $lesLignes = $this->pdo->getLesRapports($idMedecin);
         $this->data = $this->encoderReponse( $lesLignes);
-    }   
+    } 
+    private function majMedecin($args){
+        $idmedecin = $args['idmedecin'];
+        $adresse = $args['adresse'];
+        $tel = $args['tel'];
+        $specialite = $args['specialite'];
+        $this->pdo->majMedecin($idmedecin ,$adresse ,$tel ,$specialite);
+
+    } 
+    private function majRapport($args){
+        $idRapport = $args['idRapport'];
+        $bilan = $args['bilan'];
+        $motif = $args['motif'];
+        $this->pdo->majRapport($idRapport,$motif,$bilan);
+
+    } 
+    private function getLesRapportsUneDate($args){
+        $date = $args['date'];
+        $idVisiteur = $args['idVisiteur'];
+        $lesLignes = $this->pdo->getLesRapportsUneDate($idVisiteur,$date);
+        $this->data = $this->encoderReponse( $lesLignes);
+    }
+     private function getLesMedicaments($args){
+        $nom = $args['nom'];
+        $lesLignes = $this->pdo->getLesMedicaments($nom);
+        $this->data = $this->encoderReponse( $lesLignes);
+    } 
+    private function nouveauRapport($args){
+        $idVisiteur =  $args['idVisiteur'];
+        $idMedecin =  $args['idMedecin'];
+        $motif =  $args['motif'];
+        $bilan =  $args['bilan'];
+        $date =  $args['date'];
+        $medicaments = $args['medicaments'];
+        $this->pdo->ajouterRapport($idMedecin ,$idVisiteur ,$bilan ,$motif ,$date ,$medicaments);
+    }
     private function encoderReponse($data) {
         if(is_array($data)){
 				return json_encode($data);
