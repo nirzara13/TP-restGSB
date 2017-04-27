@@ -21,9 +21,6 @@ class PdoGsbRapports{
       private static $bdd='dbname=gsbrapports';   		
       private static $user='root' ;    		
       private static $mdp='' ;
-      
-        	
-      
       private static $monPdo;
       private static $monPdoGsbRapports = null;
 /**
