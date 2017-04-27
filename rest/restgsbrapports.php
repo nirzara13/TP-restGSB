@@ -189,7 +189,22 @@ class RestGSB extends Rest {
                     }
 
                 }
-                break;    
+                break;
+            case 'login':
+                if ( isset($args['id']) ) {  // l'id de la ressource NE DOIT PAS être renseigné
+                    $this->response("", 400); // Bad Request
+                }
+                else {  // Seules la méthode GET est autorisée
+                    if ($this->method == 'GET') {
+                        $this->request['fonction'] = "getLogin";
+     //                      error_log(print_r("Ok dans le bon case",true),3,"log.txt");
+                          
+                    } else {
+                        $this->response("", 400); // Bad Request
+                    }
+                }
+              
+            break;        
             case 'connexion':
              
             // ce service s'appellera à partir d'une URI de la forme GET.../restGSB/connexion?login=toto&mdp=titi
@@ -199,7 +214,7 @@ class RestGSB extends Rest {
                 }
                 else {  // Seules la méthode GET est autorisée
                     if ($this->method == 'GET') {
-                        $this->request['fonction'] = "login";
+                        $this->request['fonction'] = "connexion";
      //                      error_log(print_r("Ok dans le bon case",true),3,"log.txt");
                           
                     } else {
@@ -289,16 +304,15 @@ class RestGSB extends Rest {
         
         $this->response($this->data, $this->codeRetour);
     }
-
-    private function login($args){
+    
+    private function connexion($args){
 //         error_log(print_r( "passe dans la fonction login",true),3,"log.txt");
         $login = $args['login'];
         $mdp = $args['mdp'];
         $laLigne = $this->pdo->getLeVisiteur($login, $mdp);
   //       error_log(print_r( $laLigne,true),3,"log.txt");
          if(is_array($laLigne)){
-                $this->pdo->setTicket($laLigne['id']);
-                 $this->data = $this->encoderReponse( $laLigne);
+                     $this->data = $this->encoderReponse( $laLigne);
 //                  error_log(print_r( "passe dans le bon test",true),3,"log.txt");
          }
          else{

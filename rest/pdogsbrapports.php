@@ -51,14 +51,17 @@ class PdoGsbRapports{
 		}
 		return self::$monPdoGsbRapports;  
 	}
+       
+
 /**
  * Retourne les informations du visiteur
  * @param $login 
  * @param $mdp
  * @return le tableau associatif ou NULL
 */
+
 	public function getLeVisiteur($login, $mdp){
-		$req = "select id, nom, prenom,ticket from visiteur where login = :login and mdp = :mdp";
+		$req = "select id, nom, prenom from visiteur where login = :login and mdp = :mdp";
                 $stm = self::$monPdo->prepare($req);
                 $stm->bindParam(':login', $login);
                 $stm->bindParam(':mdp', $mdp);
@@ -177,26 +180,8 @@ class PdoGsbRapports{
                    return $retour;
                    
         }
-        public function setTicket($idVisiteur){
-                $time = time();
-                $ticket = rand(1,1000000000);
-                $req = "update visiteur set timespan = ".$time. ", ticket =".$ticket." where id='".$idVisiteur."'";
-                $rs = self::$monPdo->query($req);
-        }
-        public function estTicketValide($ticket){
-                $req = "select * from visiteur where ticket = :ticket";
-                $stm = self::$monPdo->prepare($req);
-                $stm->bindParam(':ticket', $ticket); 
-		$stm->execute();
-                $laLigne = $stm->fetch();
-                $timespanAutorise = time() - 1200;
-                $dernierTimespan = $laLigne['timespan'];
-                $ret = 0;
-                if(count($laLigne)>1)
-                        if( $dernierTimespan > $timespanAutorise  )
-                                $ret = 1;
-                return $ret;
-        }
+        
+       
 }   // fin classe
 ?>
 
